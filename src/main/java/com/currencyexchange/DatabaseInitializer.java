@@ -1,5 +1,8 @@
 package com.currencyexchange;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -8,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class DatabaseInitializer {
+    private static final Logger logger = LoggerFactory.getLogger(DatabaseInitializer.class);
 
     public static void initializeDatabase() {
         try (Connection connection = DBCPDataSource.getConnection();
@@ -23,7 +27,7 @@ public class DatabaseInitializer {
                 }
             }
         } catch (SQLException | IOException e) {
-            e.printStackTrace();
+            logger.error("Error initializing database", e);
         }
     }
 }

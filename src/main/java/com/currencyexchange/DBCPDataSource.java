@@ -1,8 +1,8 @@
 package com.currencyexchange;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,7 +19,7 @@ public final class DBCPDataSource {
     private static final int MAX_IDLE = 10;
     private static final int MAX_OPEN_PREPARED_STATEMENT = 10;
     private static final BasicDataSource ds = new BasicDataSource();
-    private static final Log log = LogFactory.getLog(DBCPDataSource.class);
+    private static final Logger logger = LoggerFactory.getLogger(DBCPDataSource.class);
 
     static {
         ClassLoader loader = DBCPDataSource.class.getClassLoader();
@@ -48,9 +48,10 @@ public final class DBCPDataSource {
             ds.setMaxIdle(MAX_IDLE);
             ds.setMaxOpenPreparedStatements(MAX_OPEN_PREPARED_STATEMENT);
 
-            log.info("DBCP DataSource initialized successfully");
+            logger.info("DBCP DataSource initialized successfully");
 
         } catch (IOException | URISyntaxException e) {
+            logger.error("Error initializing DBCP DataSource", e);
             throw new RuntimeException(e);
         }
     }
@@ -59,7 +60,7 @@ public final class DBCPDataSource {
     }
 
     public static Connection getConnection() throws SQLException {
-        log.info("Getting a connection from the pool");
+        logger.info("Getting a connection from the pool");
         return ds.getConnection();
     }
 }
