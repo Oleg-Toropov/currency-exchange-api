@@ -1,0 +1,7 @@
+# Automatically normalize line endings to CRLF on checkout on Windows
+* text=auto
+
+# Exclude binary files from normalization
+*.jpg binary
+*.png binary
+*.pdf binary
