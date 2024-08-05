@@ -14,6 +14,7 @@ import java.util.List;
 
 public class ExchangeRateDAOImpl implements ExchangeRateDAO {
     private static final Logger logger = LoggerFactory.getLogger(ExchangeRateDAOImpl.class);
+    private final CurrencyDAO currencyDAO = new CurrencyDAOImpl();
 
     @Override
     public List<ExchangeRate> getAllExchangeRates() {
@@ -44,19 +45,18 @@ public class ExchangeRateDAOImpl implements ExchangeRateDAO {
         String baseCurrencyCode = currencyCodePair.substring(0, 3);
         String targetCurrencyCode = currencyCodePair.substring(3, 6);
 
-        String query = "SELECT er.ID, er.BaseCurrencyId, er.TargetCurrencyId, er.Rate " +
-                "FROM ExchangeRates er " +
-                "JOIN Currencies bc ON er.BaseCurrencyId = bc.ID " +
-                "JOIN Currencies tc ON er.TargetCurrencyId = tc.ID " +
-                "WHERE bc.Code = ? AND tc.Code = ?";
+        int baseCurrencyId = currencyDAO.getCurrencyByCode(baseCurrencyCode).getId();
+        int targetCurrencyId = currencyDAO.getCurrencyByCode(targetCurrencyCode).getId();
+
+        String query = "SELECT * FROM ExchangeRates WHERE BaseCurrencyId = ? AND TargetCurrencyId = ?";
 
         ExchangeRate exchangeRate = null;
 
         try (Connection connection = DBCPDataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
-            statement.setString(1, baseCurrencyCode);
-            statement.setString(2, targetCurrencyCode);
+            statement.setInt(1, baseCurrencyId);
+            statement.setInt(2, targetCurrencyId);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
                     exchangeRate = new ExchangeRate();
