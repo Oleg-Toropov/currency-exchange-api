@@ -16,8 +16,18 @@ import java.util.stream.Collectors;
 
 public class ExchangeRateServiceImpl implements ExchangeRateService {
     private static final Logger logger = LoggerFactory.getLogger(ExchangeRateServiceImpl.class);
-    private final ExchangeRateDAO exchangeRateDAO = new ExchangeRateDAOImpl();
-    private final CurrencyDAO currencyDAO = new CurrencyDAOImpl();
+    private final ExchangeRateDAO exchangeRateDAO;
+    private final CurrencyDAO currencyDAO;
+
+    public ExchangeRateServiceImpl() {
+        this.exchangeRateDAO = new ExchangeRateDAOImpl();
+        this.currencyDAO = new CurrencyDAOImpl();
+    }
+
+    public ExchangeRateServiceImpl(ExchangeRateDAO exchangeRateDAO, CurrencyDAO currencyDAO) {
+        this.exchangeRateDAO = exchangeRateDAO;
+        this.currencyDAO = currencyDAO;
+    }
 
     @Override
     public List<ExchangeRateDTO> getAllExchangeRates() {
@@ -71,7 +81,7 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
     private CurrencyDTO convertCurrencyToDTO(Currency currency) {
         CurrencyDTO dto = new CurrencyDTO();
         dto.setId(currency.getId());
-        dto.setName(currency.getFullName());
+        dto.setFullName(currency.getFullName());
         dto.setCode(currency.getCode());
         dto.setSign(currency.getSign());
         return dto;

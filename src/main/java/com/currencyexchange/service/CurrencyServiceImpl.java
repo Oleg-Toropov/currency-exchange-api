@@ -1,6 +1,7 @@
 package com.currencyexchange.service;
 
 import com.currencyexchange.dao.CurrencyDAO;
+import com.currencyexchange.dao.CurrencyDAOImpl;
 import com.currencyexchange.dto.CurrencyDTO;
 import com.currencyexchange.model.Currency;
 
@@ -9,6 +10,10 @@ import java.util.stream.Collectors;
 
 public class CurrencyServiceImpl implements CurrencyService {
     private final CurrencyDAO currencyDAO;
+
+    public CurrencyServiceImpl() {
+        this.currencyDAO = new CurrencyDAOImpl();
+    }
 
     public CurrencyServiceImpl(CurrencyDAO currencyDAO) {
         this.currencyDAO = currencyDAO;
@@ -29,9 +34,16 @@ public class CurrencyServiceImpl implements CurrencyService {
     }
 
     @Override
-    public void addCurrency(CurrencyDTO currencyDTO) {
-        Currency currency = convertToEntity(currencyDTO);
-        currencyDAO.addCurrency(currency);
+    public CurrencyDTO addCurrency(CurrencyDTO currencyDTO) {
+        Currency existingCurrency = currencyDAO.getCurrencyByCode(currencyDTO.getCode());
+        if (existingCurrency != null) {
+            return null;
+        }
+
+        Currency newCurrency = convertToEntity(currencyDTO);
+        currencyDAO.addCurrency(newCurrency);
+        currencyDTO.setId(newCurrency.getId());
+        return currencyDTO;
     }
 
     @Override
@@ -48,7 +60,7 @@ public class CurrencyServiceImpl implements CurrencyService {
     private CurrencyDTO convertToDTO(Currency currency) {
         CurrencyDTO dto = new CurrencyDTO();
         dto.setId(currency.getId());
-        dto.setName(currency.getFullName());
+        dto.setFullName(currency.getFullName());
         dto.setCode(currency.getCode());
         dto.setSign(currency.getSign());
         return dto;
@@ -57,7 +69,7 @@ public class CurrencyServiceImpl implements CurrencyService {
     private Currency convertToEntity(CurrencyDTO dto) {
         Currency currency = new Currency();
         currency.setId(dto.getId());
-        currency.setFullName(dto.getName());
+        currency.setFullName(dto.getFullName());
         currency.setCode(dto.getCode());
         currency.setSign(dto.getSign());
         return currency;

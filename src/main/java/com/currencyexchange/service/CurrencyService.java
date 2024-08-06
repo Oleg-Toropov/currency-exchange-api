@@ -7,7 +7,7 @@ import java.util.List;
 public interface CurrencyService {
     List<CurrencyDTO> getAllCurrencies();
     CurrencyDTO getCurrencyByCode(String code);
-    void addCurrency(CurrencyDTO currencyDTO);
+    CurrencyDTO addCurrency(CurrencyDTO currencyDTO);
     void updateCurrency(CurrencyDTO currencyDTO);
     void deleteCurrency(int id);
 }

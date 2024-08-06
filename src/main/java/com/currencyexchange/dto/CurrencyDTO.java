@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 public class CurrencyDTO {
     private int id;
-    private String name;
     private String code;
+    private String fullName;
     private String sign;
 }
