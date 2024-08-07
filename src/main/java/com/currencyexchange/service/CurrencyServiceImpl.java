@@ -42,8 +42,9 @@ public class CurrencyServiceImpl implements CurrencyService {
 
         Currency newCurrency = convertToEntity(currencyDTO);
         currencyDAO.addCurrency(newCurrency);
-        currencyDTO.setId(newCurrency.getId());
-        return currencyDTO;
+
+        Currency addedCurrency = currencyDAO.getCurrencyByCode(newCurrency.getCode());
+        return convertToDTO(addedCurrency);
     }
 
     @Override

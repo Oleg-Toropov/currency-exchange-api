@@ -1,7 +1,7 @@
 package com.currencyexchange.dao;
 
 import com.currencyexchange.model.ExchangeRate;
-import com.currencyexchange.DBCPDataSource;
+import com.currencyexchange.config.DBCPDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,4 +1,4 @@
-package com.currencyexchange;
+package com.currencyexchange.config;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.slf4j.Logger;
@@ -20,6 +20,9 @@ public final class DBCPDataSource {
     private static final int MAX_OPEN_PREPARED_STATEMENT = 10;
     private static final BasicDataSource ds = new BasicDataSource();
     private static final Logger logger = LoggerFactory.getLogger(DBCPDataSource.class);
+
+    private DBCPDataSource() {
+    }
 
     static {
         ClassLoader loader = DBCPDataSource.class.getClassLoader();
@@ -56,11 +59,12 @@ public final class DBCPDataSource {
         }
     }
 
-    private DBCPDataSource() {
-    }
-
     public static Connection getConnection() throws SQLException {
         logger.info("Getting a connection from the pool");
         return ds.getConnection();
+    }
+
+    public static BasicDataSource getDataSource() {
+        return ds;
     }
 }
