@@ -25,11 +25,13 @@ public class DatabaseInitializer {
                 String[] queries = sqlQuery.split(";");
                 for (String query : queries) {
                     if (!query.trim().isEmpty()) {
+                        logger.info("Executing query: {}", query.trim());
                         statement.execute(query.trim());
                     }
                 }
+            } catch (NullPointerException e) {
+                logger.error("SQL file not found: create_tables.sql");
             }
-
         } catch (SQLException | IOException e) {
             logger.error("Error initializing database", e);
         }

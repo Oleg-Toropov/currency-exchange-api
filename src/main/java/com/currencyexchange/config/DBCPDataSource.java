@@ -68,3 +68,45 @@ public final class DBCPDataSource {
         return ds;
     }
 }
+////public final class DBCPDataSource {
+////    private static final String NAME_PROPERTIES = "config.properties";
+////    private static final int MIN_IDLE = 5;
+////    private static final int MAX_IDLE = 10;
+////    private static final int MAX_OPEN_PREPARED_STATEMENT = 10;
+////    private static BasicDataSource ds = new BasicDataSource();
+////    private static final Logger log = LoggerFactory.getLogger(DBCPDataSource.class);
+////
+////    static {
+////        ClassLoader loader = DBCPDataSource.class.getClassLoader();
+////
+////        try {
+////            Properties config = new Properties();
+////            InputStream is = loader.getResourceAsStream(NAME_PROPERTIES);
+////            config.load(is);
+////
+////            String dbPath = config.getProperty("db_url");
+////
+////            ds.setUrl(dbPath);
+////            ds.setMinIdle(MIN_IDLE);
+////            ds.setMaxIdle(MAX_IDLE);
+////            ds.setMaxOpenPreparedStatements(MAX_OPEN_PREPARED_STATEMENT);
+////
+////            log.info("DBCP DataSource initialized successfully");
+////
+////        } catch (IOException e) {
+////            throw new RuntimeException(e);
+////        }
+////    }
+////
+////    private DBCPDataSource() {
+////    }
+////
+////    public static Connection getConnection() throws SQLException {
+////        log.info("Getting a connection from the pool");
+////        return ds.getConnection();
+////    }
+////
+////    public static BasicDataSource getDataSource() {
+////        return ds;
+////    }
+////}

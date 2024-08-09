@@ -8,6 +8,6 @@ import lombok.Setter;
 public class CurrencyDTO {
     private int id;
     private String code;
-    private String fullName;
+    private String name;
     private String sign;
 }

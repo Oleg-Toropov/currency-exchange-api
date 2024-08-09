@@ -81,7 +81,7 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
     private CurrencyDTO convertCurrencyToDTO(Currency currency) {
         CurrencyDTO dto = new CurrencyDTO();
         dto.setId(currency.getId());
-        dto.setFullName(currency.getFullName());
+        dto.setName(currency.getFullName());
         dto.setCode(currency.getCode());
         dto.setSign(currency.getSign());
         return dto;

@@ -61,7 +61,7 @@ public class CurrencyServiceImpl implements CurrencyService {
     private CurrencyDTO convertToDTO(Currency currency) {
         CurrencyDTO dto = new CurrencyDTO();
         dto.setId(currency.getId());
-        dto.setFullName(currency.getFullName());
+        dto.setName(currency.getFullName());
         dto.setCode(currency.getCode());
         dto.setSign(currency.getSign());
         return dto;
@@ -70,7 +70,7 @@ public class CurrencyServiceImpl implements CurrencyService {
     private Currency convertToEntity(CurrencyDTO dto) {
         Currency currency = new Currency();
         currency.setId(dto.getId());
-        currency.setFullName(dto.getFullName());
+        currency.setFullName(dto.getName());
         currency.setCode(dto.getCode());
         currency.setSign(dto.getSign());
         return currency;
