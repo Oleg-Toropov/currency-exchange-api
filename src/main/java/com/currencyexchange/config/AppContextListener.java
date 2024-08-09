@@ -15,10 +15,7 @@ public class AppContextListener implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        logger.info("ServletContextListener started.");
-        logger.info("Initializing database...");
-        DatabaseInitializer.initializeDatabase();
-        logger.info("Database initialized successfully.");
+
     }
 
     @Override
