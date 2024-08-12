@@ -12,7 +12,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CurrencyDAOImpl implements CurrencyDAO{
+public class CurrencyDAOImpl implements CurrencyDAO {
     private static final Logger logger = LoggerFactory.getLogger(CurrencyDAOImpl.class);
 
     @Override
@@ -40,26 +40,47 @@ public class CurrencyDAOImpl implements CurrencyDAO{
     }
 
     @Override
+    public Currency getCurrencyById(int id) {
+        String query = "SELECT * FROM Currencies WHERE id = ?";
+        Currency currency = null;
+
+        try (Connection connection = DBCPDataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, id);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                currency = mapResultSetToCurrency(resultSet);
+            }
+        } catch (SQLException e) {
+            logger.error("Error fetching currency by id", e);
+        }
+        return currency;
+    }
+
+    @Override
     public Currency getCurrencyByCode(String code) {
         String query = "SELECT * FROM Currencies WHERE Code = ?";
         Currency currency = null;
 
         try (Connection connection = DBCPDataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
-
             statement.setString(1, code);
             try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    currency = new Currency();
-                    currency.setId(resultSet.getInt("ID"));
-                    currency.setCode(resultSet.getString("Code"));
-                    currency.setFullName(resultSet.getString("FullName"));
-                    currency.setSign(resultSet.getString("Sign"));
-                }
+                currency = mapResultSetToCurrency(resultSet);
             }
-
         } catch (SQLException e) {
             logger.error("Error fetching currency by code", e);
+        }
+        return currency;
+    }
+
+    private Currency mapResultSetToCurrency(ResultSet resultSet) throws SQLException {
+        Currency currency = null;
+        if (resultSet.next()) {
+            currency = new Currency();
+            currency.setId(resultSet.getInt("ID"));
+            currency.setCode(resultSet.getString("Code"));
+            currency.setFullName(resultSet.getString("FullName"));
+            currency.setSign(resultSet.getString("Sign"));
         }
         return currency;
     }
@@ -75,20 +96,6 @@ public class CurrencyDAOImpl implements CurrencyDAO{
             statement.executeUpdate();
         } catch (SQLException e) {
             logger.error("Error adding currency", e);
-        }
-    }
-    @Override
-    public void updateCurrency(Currency currency) {
-        String query = "UPDATE Currencies SET Code = ?, FullName = ?, Sign = ? WHERE ID = ?";
-        try (Connection connection = DBCPDataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, currency.getCode());
-            statement.setString(2, currency.getFullName());
-            statement.setString(3, currency.getSign());
-            statement.setInt(4, currency.getId());
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            logger.error("Error updating currency", e);
         }
     }
 

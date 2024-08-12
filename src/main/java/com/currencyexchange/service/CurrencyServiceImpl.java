@@ -15,10 +15,6 @@ public class CurrencyServiceImpl implements CurrencyService {
         this.currencyDAO = new CurrencyDAOImpl();
     }
 
-    public CurrencyServiceImpl(CurrencyDAO currencyDAO) {
-        this.currencyDAO = currencyDAO;
-    }
-
     @Override
     public List<CurrencyDTO> getAllCurrencies() {
         List<Currency> currencies = currencyDAO.getAllCurrencies();
@@ -30,7 +26,7 @@ public class CurrencyServiceImpl implements CurrencyService {
     @Override
     public CurrencyDTO getCurrencyByCode(String code) {
         Currency currency = currencyDAO.getCurrencyByCode(code);
-        return convertToDTO(currency);
+        return (currency == null)? null : convertToDTO(currency);
     }
 
     @Override
@@ -48,14 +44,10 @@ public class CurrencyServiceImpl implements CurrencyService {
     }
 
     @Override
-    public void updateCurrency(CurrencyDTO currencyDTO) {
-        Currency currency = convertToEntity(currencyDTO);
-        currencyDAO.updateCurrency(currency);
-    }
-
-    @Override
-    public void deleteCurrency(int id) {
+    public boolean deleteCurrency(int id) {
         currencyDAO.deleteCurrency(id);
+        Currency currency = currencyDAO.getCurrencyById(id);
+        return currency == null;
     }
 
     private CurrencyDTO convertToDTO(Currency currency) {
