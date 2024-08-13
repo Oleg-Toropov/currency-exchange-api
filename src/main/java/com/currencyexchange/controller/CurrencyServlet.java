@@ -27,7 +27,6 @@ public class CurrencyServlet extends BaseServlet {
 
             if (pathInfo == null || pathInfo.length() <= 1) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
                 objectMapper.writeValue(printWriter, new ErrorResponseDTO(ERROR_MISSING_CODE));
                 return;
             }
@@ -37,16 +36,13 @@ public class CurrencyServlet extends BaseServlet {
 
             if (currency == null) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                response.setContentType("application/json");
                 objectMapper.writeValue(printWriter, new ErrorResponseDTO(ERROR_CURRENCY_NOT_FOUND));
             } else {
                 response.setStatus(HttpServletResponse.SC_OK);
-                response.setContentType("application/json");
                 objectMapper.writeValue(printWriter, currency);
             }
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.setContentType("application/json");
             objectMapper.writeValue(printWriter, new ErrorResponseDTO(ERROR_DATABASE_UNAVAILABLE));
         }
     }
@@ -58,7 +54,6 @@ public class CurrencyServlet extends BaseServlet {
 
             if (pathInfo == null || pathInfo.length() <= 1 || !pathInfo.substring(1).matches("^\\d+$")) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.setContentType("application/json");
                 objectMapper.writeValue(printWriter, new ErrorResponseDTO(ERROR_MISSING_ID));
                 return;
             }
@@ -70,12 +65,10 @@ public class CurrencyServlet extends BaseServlet {
                 response.setStatus(HttpServletResponse.SC_OK);
             } else {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                response.setContentType("application/json");
                 objectMapper.writeValue(printWriter, new ErrorResponseDTO(ERROR_CURRENCY_NOT_FOUND));
             }
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.setContentType("application/json");
             objectMapper.writeValue(printWriter, new ErrorResponseDTO(ERROR_DATABASE_UNAVAILABLE));
         }
     }
