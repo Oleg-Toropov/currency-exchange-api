@@ -2,6 +2,7 @@ package com.currencyexchange.controller;
 
 import com.currencyexchange.dto.CurrencyDTO;
 import com.currencyexchange.dto.ErrorResponseDTO;
+import com.currencyexchange.exception.DatabaseUnavailableException;
 import com.currencyexchange.service.CurrencyService;
 import com.currencyexchange.service.CurrencyServiceImpl;
 import jakarta.servlet.ServletException;
@@ -41,7 +42,7 @@ public class CurrencyServlet extends BaseServlet {
                 response.setStatus(HttpServletResponse.SC_OK);
                 objectMapper.writeValue(printWriter, currency);
             }
-        } catch (Exception e) {
+        } catch (DatabaseUnavailableException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             objectMapper.writeValue(printWriter, new ErrorResponseDTO(ERROR_DATABASE_UNAVAILABLE));
         }
@@ -67,7 +68,7 @@ public class CurrencyServlet extends BaseServlet {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 objectMapper.writeValue(printWriter, new ErrorResponseDTO(ERROR_CURRENCY_NOT_FOUND));
             }
-        } catch (Exception e) {
+        } catch (DatabaseUnavailableException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             objectMapper.writeValue(printWriter, new ErrorResponseDTO(ERROR_DATABASE_UNAVAILABLE));
         }

@@ -31,15 +31,8 @@ public class CurrencyServiceImpl implements CurrencyService {
 
     @Override
     public CurrencyDTO addCurrency(CurrencyDTO currencyDTO) {
-        Currency existingCurrency = currencyDAO.getCurrencyByCode(currencyDTO.getCode());
-        if (existingCurrency != null) {
-            return null;
-        }
-
         Currency newCurrency = convertToEntity(currencyDTO);
-        currencyDAO.addCurrency(newCurrency);
-
-        Currency addedCurrency = currencyDAO.getCurrencyByCode(newCurrency.getCode());
+        Currency addedCurrency = currencyDAO.addCurrency(newCurrency);
         return convertToDTO(addedCurrency);
     }
 

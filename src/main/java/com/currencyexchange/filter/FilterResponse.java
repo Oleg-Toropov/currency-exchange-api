@@ -18,7 +18,6 @@ public class FilterResponse implements Filter {
                          FilterChain filterChain) throws IOException, ServletException {
         servletResponse.setContentType("application/json");
         filterChain.doFilter(servletRequest, servletResponse);
-
     }
 
     @Override

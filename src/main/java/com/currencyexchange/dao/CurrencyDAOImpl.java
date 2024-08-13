@@ -1,5 +1,6 @@
 package com.currencyexchange.dao;
 
+import com.currencyexchange.exception.DatabaseUnavailableException;
 import com.currencyexchange.model.Currency;
 import com.currencyexchange.config.DBCPDataSource;
 import org.slf4j.Logger;
@@ -86,16 +87,25 @@ public class CurrencyDAOImpl implements CurrencyDAO {
     }
 
     @Override
-    public void addCurrency(Currency currency) {
+    public Currency addCurrency(Currency currency) {
         String query = "INSERT INTO Currencies (Code, FullName, Sign) VALUES (?, ?, ?)";
+
         try (Connection connection = DBCPDataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, currency.getCode());
             statement.setString(2, currency.getFullName());
             statement.setString(3, currency.getSign());
             statement.executeUpdate();
+
+            ResultSet resultSet = statement.getGeneratedKeys();
+            resultSet.next();
+            currency.setId(resultSet.getInt(1));
+
+            return currency;
+
         } catch (SQLException e) {
             logger.error("Error adding currency", e);
+            throw new DatabaseUnavailableException(e);
         }
     }
 

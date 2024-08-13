@@ -2,6 +2,7 @@ package com.currencyexchange.controller;
 
 import com.currencyexchange.dto.CurrencyDTO;
 import com.currencyexchange.dto.ErrorResponseDTO;
+import com.currencyexchange.exception.DatabaseUnavailableException;
 import com.currencyexchange.service.CurrencyService;
 import com.currencyexchange.service.CurrencyServiceImpl;
 import jakarta.servlet.ServletException;
@@ -10,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 
 @WebServlet(name = "CurrenciesServlet", urlPatterns = "/currencies")
@@ -18,6 +20,7 @@ public class CurrenciesServlet extends BaseServlet {
     private static final String ERROR_MISSING_FIELDS = "Missing required field(s)";
     private static final String ERROR_CURRENCY_EXISTS = "Currency with this code already exists";
     private static final String ERROR_DATABASE_UNAVAILABLE = "The database is unavailable";
+    private static final int ERROR_CODE_SQLITE_CONSTRAINT = 19;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -25,7 +28,7 @@ public class CurrenciesServlet extends BaseServlet {
             List<CurrencyDTO> currencies = currencyService.getAllCurrencies();
             response.setStatus(HttpServletResponse.SC_OK);
             printWriter.write(objectMapper.writeValueAsString(currencies));
-        } catch (Exception e) {
+        } catch (DatabaseUnavailableException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             objectMapper.writeValue(printWriter, new ErrorResponseDTO(ERROR_DATABASE_UNAVAILABLE));
         }
@@ -44,23 +47,23 @@ public class CurrenciesServlet extends BaseServlet {
                 return;
             }
 
-            CurrencyDTO newCurrency = new CurrencyDTO();
-            newCurrency.setName(name);
-            newCurrency.setCode(code);
-            newCurrency.setSign(sign);
-
+            CurrencyDTO newCurrency = new CurrencyDTO(null, code, name, sign);
             CurrencyDTO addedCurrency = currencyService.addCurrency(newCurrency);
 
-            if (addedCurrency == null) {
+            response.setStatus(HttpServletResponse.SC_CREATED);
+            objectMapper.writeValue(printWriter, addedCurrency);
+
+
+        } catch (DatabaseUnavailableException e) {
+            SQLException t = (SQLException) e.getCause();
+
+            if (t.getErrorCode() == ERROR_CODE_SQLITE_CONSTRAINT) {
                 response.setStatus(HttpServletResponse.SC_CONFLICT);
                 objectMapper.writeValue(printWriter, new ErrorResponseDTO(ERROR_CURRENCY_EXISTS));
             } else {
-                response.setStatus(HttpServletResponse.SC_CREATED);
-                objectMapper.writeValue(printWriter, addedCurrency);
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                objectMapper.writeValue(printWriter, new ErrorResponseDTO(ERROR_DATABASE_UNAVAILABLE));
             }
-        } catch (Exception e) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            objectMapper.writeValue(printWriter, new ErrorResponseDTO(ERROR_DATABASE_UNAVAILABLE));
         }
     }
 

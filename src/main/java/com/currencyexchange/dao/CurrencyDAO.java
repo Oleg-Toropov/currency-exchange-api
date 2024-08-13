@@ -8,6 +8,6 @@ public interface CurrencyDAO {
     List<Currency> getAllCurrencies();
     Currency getCurrencyById(int id);
     Currency getCurrencyByCode(String code);
-    void addCurrency(Currency currency);
+    Currency addCurrency(Currency currency);
     void deleteCurrency(int id);
 }
