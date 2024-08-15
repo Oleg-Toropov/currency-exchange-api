@@ -110,11 +110,11 @@ public class CurrencyDAOImpl implements CurrencyDAO {
     }
 
     @Override
-    public void deleteCurrency(int id) {
-        String query = "DELETE FROM Currencies WHERE ID = ?";
+    public void deleteCurrency(String code) {
+        String query = "DELETE FROM Currencies WHERE Code = ?";
         try (Connection connection = DBCPDataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, id);
+            statement.setString(1, code);
             statement.executeUpdate();
         } catch (SQLException e) {
             logger.error("Error deleting currency", e);

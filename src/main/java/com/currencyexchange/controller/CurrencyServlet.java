@@ -3,6 +3,7 @@ package com.currencyexchange.controller;
 import com.currencyexchange.dto.CurrencyDTO;
 import com.currencyexchange.dto.ErrorResponseDTO;
 import com.currencyexchange.exception.DatabaseUnavailableException;
+import com.currencyexchange.exception.InvalidCurrencyCodeException;
 import com.currencyexchange.service.CurrencyService;
 import com.currencyexchange.service.CurrencyServiceImpl;
 import jakarta.servlet.ServletException;
@@ -15,22 +16,14 @@ import java.io.IOException;
 @WebServlet(name = "CurrencyServlet", urlPatterns = "/currency/*")
 public class CurrencyServlet extends BaseServlet {
     private final CurrencyService currencyService = new CurrencyServiceImpl();
-    private static final String ERROR_MISSING_CODE = "Currency code is missing in the request URL";
-    private static final String ERROR_MISSING_ID = "Currency id is missing in the request URL or write wrong";
     private static final String ERROR_CURRENCY_NOT_FOUND = "Currency not found";
-    private static final String ERROR_DATABASE_UNAVAILABLE = "The database is unavailable";
-
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        try {
-            String pathInfo = request.getPathInfo();
+        String pathInfo = request.getPathInfo();
 
-            if (pathInfo == null || pathInfo.length() <= 1) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                objectMapper.writeValue(printWriter, new ErrorResponseDTO(ERROR_MISSING_CODE));
-                return;
-            }
+        try {
+            Validator.validateCurrencyCode(pathInfo);
 
             String currencyCode = pathInfo.substring(1).toUpperCase();
             CurrencyDTO currency = currencyService.getCurrencyByCode(currencyCode);
@@ -42,35 +35,37 @@ public class CurrencyServlet extends BaseServlet {
                 response.setStatus(HttpServletResponse.SC_OK);
                 objectMapper.writeValue(printWriter, currency);
             }
+        } catch (InvalidCurrencyCodeException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            objectMapper.writeValue(printWriter, new ErrorResponseDTO(e.getMessage()));
         } catch (DatabaseUnavailableException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            objectMapper.writeValue(printWriter, new ErrorResponseDTO(ERROR_DATABASE_UNAVAILABLE));
+            objectMapper.writeValue(printWriter, new ErrorResponseDTO(e.getMessage()));
         }
     }
 
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String pathInfo = request.getPathInfo();
+
         try {
-            String pathInfo = request.getPathInfo();
+            Validator.validateCurrencyCode(pathInfo);
 
-            if (pathInfo == null || pathInfo.length() <= 1 || !pathInfo.substring(1).matches("^\\d+$")) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                objectMapper.writeValue(printWriter, new ErrorResponseDTO(ERROR_MISSING_ID));
-                return;
-            }
+            String currencyCode = pathInfo.substring(1).toUpperCase();
+            boolean wasItDeleted = currencyService.deleteCurrency(currencyCode);
 
-            int currentId = Integer.parseInt(pathInfo.substring(1));
-            boolean deleted = currencyService.deleteCurrency(currentId);
-
-            if (deleted) {
+            if (wasItDeleted) {
                 response.setStatus(HttpServletResponse.SC_OK);
             } else {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 objectMapper.writeValue(printWriter, new ErrorResponseDTO(ERROR_CURRENCY_NOT_FOUND));
             }
+        } catch (InvalidCurrencyCodeException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            objectMapper.writeValue(printWriter, new ErrorResponseDTO(e.getMessage()));
         } catch (DatabaseUnavailableException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            objectMapper.writeValue(printWriter, new ErrorResponseDTO(ERROR_DATABASE_UNAVAILABLE));
+            objectMapper.writeValue(printWriter, new ErrorResponseDTO(e.getMessage()));
         }
     }
 

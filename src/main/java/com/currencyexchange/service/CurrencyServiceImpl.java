@@ -37,10 +37,14 @@ public class CurrencyServiceImpl implements CurrencyService {
     }
 
     @Override
-    public boolean deleteCurrency(int id) {
-        currencyDAO.deleteCurrency(id);
-        Currency currency = currencyDAO.getCurrencyById(id);
-        return currency == null;
+    public boolean deleteCurrency(String code) {
+        Currency currency = currencyDAO.getCurrencyByCode(code);
+        if (currency != null) {
+            currencyDAO.deleteCurrency(code);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private CurrencyDTO convertToDTO(Currency currency) {

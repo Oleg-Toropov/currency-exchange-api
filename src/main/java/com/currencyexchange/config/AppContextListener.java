@@ -20,7 +20,7 @@ public class AppContextListener implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        logger.info("ServletContextListener destroyed.");
+        logger.info("ServletContextListener destroyed");
         closeDatabaseConnectionPool();
     }
 
@@ -29,7 +29,7 @@ public class AppContextListener implements ServletContextListener {
             BasicDataSource ds = DBCPDataSource.getDataSource();
             if (ds != null) {
                 ds.close();
-                logger.info("Database connection pool closed.");
+                logger.info("Database connection pool closed");
             }
         } catch (SQLException e) {
             logger.error("Error closing database connection pool", e);

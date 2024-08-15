@@ -9,5 +9,6 @@ public interface CurrencyDAO {
     Currency getCurrencyById(int id);
     Currency getCurrencyByCode(String code);
     Currency addCurrency(Currency currency);
-    void deleteCurrency(int id);
+    void deleteCurrency(String code);
+    
 }
