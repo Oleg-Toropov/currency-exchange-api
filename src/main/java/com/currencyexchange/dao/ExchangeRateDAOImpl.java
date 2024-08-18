@@ -1,5 +1,6 @@
 package com.currencyexchange.dao;
 
+import com.currencyexchange.exception.DatabaseUnavailableException;
 import com.currencyexchange.model.ExchangeRate;
 import com.currencyexchange.config.DBCPDataSource;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ public class ExchangeRateDAOImpl implements ExchangeRateDAO {
     @Override
     public List<ExchangeRate> getAllExchangeRates() {
         List<ExchangeRate> exchangeRates = new ArrayList<>();
+
         String query = "SELECT * FROM ExchangeRates";
 
         try (Connection connection = DBCPDataSource.getConnection();
@@ -31,12 +33,15 @@ public class ExchangeRateDAOImpl implements ExchangeRateDAO {
                 exchangeRate.setBaseCurrencyId(resultSet.getInt("BaseCurrencyId"));
                 exchangeRate.setTargetCurrencyId(resultSet.getInt("TargetCurrencyId"));
                 exchangeRate.setRate(resultSet.getBigDecimal("Rate"));
+
                 exchangeRates.add(exchangeRate);
             }
 
         } catch (SQLException e) {
             logger.error("Error fetching exchange rates", e);
+            throw new DatabaseUnavailableException(e);
         }
+
         return exchangeRates;
     }
 
@@ -45,8 +50,8 @@ public class ExchangeRateDAOImpl implements ExchangeRateDAO {
         String baseCurrencyCode = currencyCodePair.substring(0, 3);
         String targetCurrencyCode = currencyCodePair.substring(3, 6);
 
-        int baseCurrencyId = currencyDAO.getCurrencyByCode(baseCurrencyCode).getId();
-        int targetCurrencyId = currencyDAO.getCurrencyByCode(targetCurrencyCode).getId();
+//        int baseCurrencyId = currencyDAO.getCurrencyByCode(baseCurrencyCode).getId();
+//        int targetCurrencyId = currencyDAO.getCurrencyByCode(targetCurrencyCode).getId();
 
         String query = "SELECT * FROM ExchangeRates WHERE BaseCurrencyId = ? AND TargetCurrencyId = ?";
 
@@ -55,8 +60,8 @@ public class ExchangeRateDAOImpl implements ExchangeRateDAO {
         try (Connection connection = DBCPDataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
 
-            statement.setInt(1, baseCurrencyId);
-            statement.setInt(2, targetCurrencyId);
+//            statement.setInt(1, baseCurrencyId);
+//            statement.setInt(2, targetCurrencyId);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
                     exchangeRate = new ExchangeRate();
@@ -69,6 +74,7 @@ public class ExchangeRateDAOImpl implements ExchangeRateDAO {
 
         } catch (SQLException e) {
             logger.error("Error fetching exchange rate by currency code pair", e);
+            throw new DatabaseUnavailableException(e);
         }
         return exchangeRate;
     }
@@ -84,6 +90,7 @@ public class ExchangeRateDAOImpl implements ExchangeRateDAO {
             statement.executeUpdate();
         } catch (SQLException e) {
             logger.error("Error adding exchange rate", e);
+            throw new DatabaseUnavailableException(e);
         }
     }
 
@@ -99,6 +106,7 @@ public class ExchangeRateDAOImpl implements ExchangeRateDAO {
             statement.executeUpdate();
         } catch (SQLException e) {
             logger.error("Error updating exchange rate", e);
+            throw new DatabaseUnavailableException(e);
         }
     }
 
@@ -111,6 +119,7 @@ public class ExchangeRateDAOImpl implements ExchangeRateDAO {
             statement.executeUpdate();
         } catch (SQLException e) {
             logger.error("Error deleting exchange rate", e);
+            throw new DatabaseUnavailableException(e);
         }
     }
 }

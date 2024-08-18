@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class CurrencyDAOImpl implements CurrencyDAO {
     private static final Logger logger = LoggerFactory.getLogger(CurrencyDAOImpl.class);
@@ -26,16 +27,12 @@ public class CurrencyDAOImpl implements CurrencyDAO {
              ResultSet resultSet = statement.executeQuery()) {
 
             while (resultSet.next()) {
-                Currency currency = new Currency();
-                currency.setId(resultSet.getInt("ID"));
-                currency.setCode(resultSet.getString("Code"));
-                currency.setFullName(resultSet.getString("FullName"));
-                currency.setSign(resultSet.getString("Sign"));
-                currencies.add(currency);
+                currencies.add(mapResultSetToCurrency(resultSet));
             }
 
         } catch (SQLException e) {
             logger.error("Error fetching currencies", e);
+            throw new DatabaseUnavailableException(e);
         }
         return currencies;
     }
@@ -44,46 +41,51 @@ public class CurrencyDAOImpl implements CurrencyDAO {
     public Currency getCurrencyById(int id) {
         String query = "SELECT * FROM Currencies WHERE id = ?";
         Currency currency = null;
-
         try (Connection connection = DBCPDataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, id);
-            try (ResultSet resultSet = statement.executeQuery()) {
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
                 currency = mapResultSetToCurrency(resultSet);
             }
+
         } catch (SQLException e) {
             logger.error("Error fetching currency by id", e);
+            throw new DatabaseUnavailableException(e);
         }
-        return currency;
+
+      return currency;
     }
 
     @Override
-    public Currency getCurrencyByCode(String code) {
+    public Optional<Currency> getCurrencyByCode(String code) {
         String query = "SELECT * FROM Currencies WHERE Code = ?";
-        Currency currency = null;
 
         try (Connection connection = DBCPDataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, code);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                currency = mapResultSetToCurrency(resultSet);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                return Optional.of(mapResultSetToCurrency(resultSet));
             }
+
         } catch (SQLException e) {
             logger.error("Error fetching currency by code", e);
+            throw new DatabaseUnavailableException(e);
         }
-        return currency;
+
+        return Optional.empty();
     }
 
-    private Currency mapResultSetToCurrency(ResultSet resultSet) throws SQLException {
-        Currency currency = null;
-        if (resultSet.next()) {
-            currency = new Currency();
-            currency.setId(resultSet.getInt("ID"));
-            currency.setCode(resultSet.getString("Code"));
-            currency.setFullName(resultSet.getString("FullName"));
-            currency.setSign(resultSet.getString("Sign"));
+    private Currency mapResultSetToCurrency(ResultSet resultSet) {
+        try {
+            return new Currency(resultSet.getInt("ID"), resultSet.getString("Code"),
+                    resultSet.getString("FullName"), resultSet.getString("Sign"));
+        } catch (SQLException e) {
+            throw new DatabaseUnavailableException(e);
         }
-        return currency;
     }
 
     @Override
@@ -118,6 +120,7 @@ public class CurrencyDAOImpl implements CurrencyDAO {
             statement.executeUpdate();
         } catch (SQLException e) {
             logger.error("Error deleting currency", e);
+            throw new DatabaseUnavailableException(e);
         }
     }
 }

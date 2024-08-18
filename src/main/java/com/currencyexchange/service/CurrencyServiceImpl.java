@@ -6,6 +6,7 @@ import com.currencyexchange.dto.CurrencyDTO;
 import com.currencyexchange.model.Currency;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class CurrencyServiceImpl implements CurrencyService {
@@ -19,27 +20,27 @@ public class CurrencyServiceImpl implements CurrencyService {
     public List<CurrencyDTO> getAllCurrencies() {
         List<Currency> currencies = currencyDAO.getAllCurrencies();
         return currencies.stream()
-                .map(this::convertToDTO)
+                .map(this::convertCurrencyToDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
     public CurrencyDTO getCurrencyByCode(String code) {
-        Currency currency = currencyDAO.getCurrencyByCode(code);
-        return (currency == null)? null : convertToDTO(currency);
+        Optional<Currency> currency = currencyDAO.getCurrencyByCode(code);
+        return currency.map(this::convertCurrencyToDTO).orElse(null);
     }
 
     @Override
     public CurrencyDTO addCurrency(CurrencyDTO currencyDTO) {
-        Currency newCurrency = convertToEntity(currencyDTO);
+        Currency newCurrency = convertCurrencyDTOToEntity(currencyDTO);
         Currency addedCurrency = currencyDAO.addCurrency(newCurrency);
-        return convertToDTO(addedCurrency);
+        return convertCurrencyToDTO(addedCurrency);
     }
 
     @Override
     public boolean deleteCurrency(String code) {
-        Currency currency = currencyDAO.getCurrencyByCode(code);
-        if (currency != null) {
+        Optional <Currency> currency = currencyDAO.getCurrencyByCode(code);
+        if (currency.isPresent()) {
             currencyDAO.deleteCurrency(code);
             return true;
         } else {
@@ -47,21 +48,11 @@ public class CurrencyServiceImpl implements CurrencyService {
         }
     }
 
-    private CurrencyDTO convertToDTO(Currency currency) {
-        CurrencyDTO dto = new CurrencyDTO();
-        dto.setId(currency.getId());
-        dto.setName(currency.getFullName());
-        dto.setCode(currency.getCode());
-        dto.setSign(currency.getSign());
-        return dto;
+    public CurrencyDTO convertCurrencyToDTO(Currency currency) {
+        return new CurrencyDTO(currency.getId(), currency.getCode(), currency.getFullName(), currency.getSign());
     }
 
-    private Currency convertToEntity(CurrencyDTO dto) {
-        Currency currency = new Currency();
-        currency.setId(dto.getId());
-        currency.setFullName(dto.getName());
-        currency.setCode(dto.getCode());
-        currency.setSign(dto.getSign());
-        return currency;
+    public Currency convertCurrencyDTOToEntity(CurrencyDTO dto) {
+        return new Currency(dto.getId(), dto.getCode(), dto.getName(), dto.getSign());
     }
 }

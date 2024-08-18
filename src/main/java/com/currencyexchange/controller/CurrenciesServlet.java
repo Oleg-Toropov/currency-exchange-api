@@ -27,7 +27,7 @@ public class CurrenciesServlet extends BaseServlet {
         try {
             List<CurrencyDTO> currencies = currencyService.getAllCurrencies();
             response.setStatus(HttpServletResponse.SC_OK);
-            printWriter.write(objectMapper.writeValueAsString(currencies));
+            objectMapper.writeValue(printWriter, currencies);
         } catch (DatabaseUnavailableException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             objectMapper.writeValue(printWriter, new ErrorResponseDTO(e.getMessage()));

@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CurrencyDTO {
     private Integer id;
-    private String code;
     private String name;
+    private String code;
     private String sign;
 }
