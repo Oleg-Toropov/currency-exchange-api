@@ -1,6 +1,7 @@
 package com.currencyexchange.dao;
 
 import com.currencyexchange.exception.DatabaseUnavailableException;
+import com.currencyexchange.model.Currency;
 import com.currencyexchange.model.ExchangeRate;
 import com.currencyexchange.config.DBCPDataSource;
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ExchangeRateDAOImpl implements ExchangeRateDAO {
     private static final Logger logger = LoggerFactory.getLogger(ExchangeRateDAOImpl.class);
@@ -20,7 +22,6 @@ public class ExchangeRateDAOImpl implements ExchangeRateDAO {
     @Override
     public List<ExchangeRate> getAllExchangeRates() {
         List<ExchangeRate> exchangeRates = new ArrayList<>();
-
         String query = "SELECT * FROM ExchangeRates";
 
         try (Connection connection = DBCPDataSource.getConnection();
@@ -28,13 +29,7 @@ public class ExchangeRateDAOImpl implements ExchangeRateDAO {
              ResultSet resultSet = statement.executeQuery()) {
 
             while (resultSet.next()) {
-                ExchangeRate exchangeRate = new ExchangeRate();
-                exchangeRate.setId(resultSet.getInt("ID"));
-                exchangeRate.setBaseCurrencyId(resultSet.getInt("BaseCurrencyId"));
-                exchangeRate.setTargetCurrencyId(resultSet.getInt("TargetCurrencyId"));
-                exchangeRate.setRate(resultSet.getBigDecimal("Rate"));
-
-                exchangeRates.add(exchangeRate);
+                exchangeRates.add(mapResultSetToExchangeRate(resultSet));
             }
 
         } catch (SQLException e) {
@@ -46,37 +41,34 @@ public class ExchangeRateDAOImpl implements ExchangeRateDAO {
     }
 
     @Override
-    public ExchangeRate getExchangeRateByCurrencyCode(String currencyCodePair) {
-        String baseCurrencyCode = currencyCodePair.substring(0, 3);
-        String targetCurrencyCode = currencyCodePair.substring(3, 6);
-
-//        int baseCurrencyId = currencyDAO.getCurrencyByCode(baseCurrencyCode).getId();
-//        int targetCurrencyId = currencyDAO.getCurrencyByCode(targetCurrencyCode).getId();
-
+    public Optional<ExchangeRate> getExchangeRateByCurrencyPairId(int baseCurrencyId, int targetCurrencyId) {
         String query = "SELECT * FROM ExchangeRates WHERE BaseCurrencyId = ? AND TargetCurrencyId = ?";
-
-        ExchangeRate exchangeRate = null;
 
         try (Connection connection = DBCPDataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, baseCurrencyId);
+            statement.setInt(2, targetCurrencyId);
+            ResultSet resultSet = statement.executeQuery();
 
-//            statement.setInt(1, baseCurrencyId);
-//            statement.setInt(2, targetCurrencyId);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    exchangeRate = new ExchangeRate();
-                    exchangeRate.setId(resultSet.getInt("ID"));
-                    exchangeRate.setBaseCurrencyId(resultSet.getInt("BaseCurrencyId"));
-                    exchangeRate.setTargetCurrencyId(resultSet.getInt("TargetCurrencyId"));
-                    exchangeRate.setRate(resultSet.getBigDecimal("Rate"));
-                }
+            if (resultSet.next()) {
+                return Optional.of(mapResultSetToExchangeRate(resultSet));
             }
 
         } catch (SQLException e) {
             logger.error("Error fetching exchange rate by currency code pair", e);
             throw new DatabaseUnavailableException(e);
         }
-        return exchangeRate;
+
+        return Optional.empty();
+    }
+
+    private ExchangeRate mapResultSetToExchangeRate(ResultSet resultSet) {
+        try {
+            return new ExchangeRate(resultSet.getInt("ID"), resultSet.getInt("BaseCurrencyId"),
+                    resultSet.getInt("TargetCurrencyId"), resultSet.getBigDecimal("Rate"));
+        } catch (SQLException e) {
+            throw new DatabaseUnavailableException(e);
+        }
     }
 
     @Override

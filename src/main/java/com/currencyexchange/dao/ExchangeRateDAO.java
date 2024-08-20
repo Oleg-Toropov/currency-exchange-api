@@ -1,12 +1,18 @@
 package com.currencyexchange.dao;
 
 import com.currencyexchange.model.ExchangeRate;
+
 import java.util.List;
+import java.util.Optional;
 
 public interface ExchangeRateDAO {
     List<ExchangeRate> getAllExchangeRates();
-    ExchangeRate getExchangeRateByCurrencyCode(String currencyCodePair);
+
+    Optional<ExchangeRate> getExchangeRateByCurrencyPairId(int baseCurrencyId, int targetCurrencyId);
+
     void addExchangeRate(ExchangeRate exchangeRate);
+
     void updateExchangeRate(ExchangeRate exchangeRate);
+
     void deleteExchangeRate(int id);
 }

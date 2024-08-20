@@ -7,9 +7,12 @@ import java.util.Optional;
 
 public interface CurrencyDAO {
     List<Currency> getAllCurrencies();
-    Currency getCurrencyById(int id);
-    Optional<Currency>  getCurrencyByCode(String code);
+
+    Optional<Currency> getCurrencyById(int id);
+
+    Optional<Currency> getCurrencyByCode(String code);
+
     Currency addCurrency(Currency currency);
+
     void deleteCurrency(String code);
-    
 }

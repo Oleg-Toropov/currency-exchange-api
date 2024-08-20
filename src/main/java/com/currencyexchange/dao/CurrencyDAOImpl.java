@@ -38,16 +38,16 @@ public class CurrencyDAOImpl implements CurrencyDAO {
     }
 
     @Override
-    public Currency getCurrencyById(int id) {
+    public Optional<Currency> getCurrencyById(int id) {
         String query = "SELECT * FROM Currencies WHERE id = ?";
-        Currency currency = null;
+
         try (Connection connection = DBCPDataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, id);
             ResultSet resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                currency = mapResultSetToCurrency(resultSet);
+                return Optional.of(mapResultSetToCurrency(resultSet));
             }
 
         } catch (SQLException e) {
@@ -55,7 +55,7 @@ public class CurrencyDAOImpl implements CurrencyDAO {
             throw new DatabaseUnavailableException(e);
         }
 
-      return currency;
+        return Optional.empty();
     }
 
     @Override
