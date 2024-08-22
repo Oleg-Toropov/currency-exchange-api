@@ -2,8 +2,10 @@ package com.currencyexchange.controller;
 
 import com.currencyexchange.exception.InvalidCurrencyCodePairException;
 import com.currencyexchange.exception.InvalidCurrencyCodeException;
-import com.currencyexchange.exception.InvalidParametersException;
+import com.currencyexchange.exception.InvalidFieldsException;
+import com.currencyexchange.exception.InvalidRateException;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public class Validator {
@@ -11,11 +13,17 @@ public class Validator {
     private static final int POSITION_TARGET_CODE = 6;
     private static final int LENGTH_RATE_CODE = 6;
 
-    public static void validateParameters(List<String> parameters) {
-        for (String parameter : parameters) {
-            if (parameter == null || parameter.isEmpty()) {
-                throw new InvalidParametersException();
+    public static void validateFields(List<String> fields) {
+        for (String field : fields) {
+            if (field == null || field.isEmpty()) {
+                throw new InvalidFieldsException();
             }
+        }
+    }
+
+    public static void validateRate(String rate) {
+        if (!rate.matches("^\\d+(\\.\\d+)?$")) {
+            throw new InvalidRateException();
         }
     }
 

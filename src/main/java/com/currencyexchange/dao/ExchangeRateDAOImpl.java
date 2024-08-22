@@ -1,9 +1,8 @@
 package com.currencyexchange.dao;
 
-import com.currencyexchange.exception.DatabaseUnavailableException;
-import com.currencyexchange.model.Currency;
-import com.currencyexchange.model.ExchangeRate;
 import com.currencyexchange.config.DBCPDataSource;
+import com.currencyexchange.exception.DatabaseUnavailableException;
+import com.currencyexchange.model.ExchangeRate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +71,7 @@ public class ExchangeRateDAOImpl implements ExchangeRateDAO {
     }
 
     @Override
-    public void addExchangeRate(ExchangeRate exchangeRate) {
+    public ExchangeRate addExchangeRate(ExchangeRate exchangeRate) {
         String query = "INSERT INTO ExchangeRates (BaseCurrencyId, TargetCurrencyId, Rate) VALUES (?, ?, ?)";
         try (Connection connection = DBCPDataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -80,6 +79,13 @@ public class ExchangeRateDAOImpl implements ExchangeRateDAO {
             statement.setInt(2, exchangeRate.getTargetCurrencyId());
             statement.setBigDecimal(3, exchangeRate.getRate());
             statement.executeUpdate();
+
+            ResultSet resultSet = statement.getGeneratedKeys();
+            resultSet.next();
+            exchangeRate.setId(resultSet.getInt(1));
+
+            return exchangeRate;
+
         } catch (SQLException e) {
             logger.error("Error adding exchange rate", e);
             throw new DatabaseUnavailableException(e);

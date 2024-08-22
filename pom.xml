@@ -20,7 +20,7 @@
         <maven.compiler.target>17</maven.compiler.target>
 
         <jakarta.servlet.version>5.0.0</jakarta.servlet.version>
-        <sqlite-jdbc.version>3.41.2.2</sqlite-jdbc.version>
+        <sqlite-jdbc.version>3.46.0.0</sqlite-jdbc.version>
         <commons-dbcp2.version>2.9.0</commons-dbcp2.version>
         <jackson-databind.version>2.13.4.1</jackson-databind.version>
         <junit.version>4.13.1</junit.version>

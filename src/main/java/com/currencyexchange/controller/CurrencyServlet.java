@@ -2,6 +2,7 @@ package com.currencyexchange.controller;
 
 import com.currencyexchange.dto.CurrencyDTO;
 import com.currencyexchange.dto.ErrorResponseDTO;
+import com.currencyexchange.exception.CurrencyNotFoundException;
 import com.currencyexchange.exception.DatabaseUnavailableException;
 import com.currencyexchange.exception.InvalidCurrencyCodeException;
 import com.currencyexchange.service.CurrencyService;
@@ -16,7 +17,6 @@ import java.io.IOException;
 @WebServlet(name = "CurrencyServlet", urlPatterns = "/currency/*")
 public class CurrencyServlet extends BaseServlet {
     private final CurrencyService currencyService = new CurrencyServiceImpl();
-    private static final String ERROR_CURRENCY_NOT_FOUND = "Currency not found";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -27,16 +27,14 @@ public class CurrencyServlet extends BaseServlet {
 
             String currencyCode = pathInfo.substring(1).toUpperCase();
             CurrencyDTO currency = currencyService.getCurrencyByCode(currencyCode);
+            response.setStatus(HttpServletResponse.SC_OK);
+            objectMapper.writeValue(printWriter, currency);
 
-            if (currency == null) {
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                objectMapper.writeValue(printWriter, new ErrorResponseDTO(ERROR_CURRENCY_NOT_FOUND));
-            } else {
-                response.setStatus(HttpServletResponse.SC_OK);
-                objectMapper.writeValue(printWriter, currency);
-            }
         } catch (InvalidCurrencyCodeException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            objectMapper.writeValue(printWriter, new ErrorResponseDTO(e.getMessage()));
+        } catch (CurrencyNotFoundException e) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             objectMapper.writeValue(printWriter, new ErrorResponseDTO(e.getMessage()));
         } catch (DatabaseUnavailableException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -52,16 +50,14 @@ public class CurrencyServlet extends BaseServlet {
             Validator.validateCurrencyCode(pathInfo);
 
             String currencyCode = pathInfo.substring(1).toUpperCase();
-            boolean wasItDeleted = currencyService.deleteCurrency(currencyCode);
+            currencyService.deleteCurrency(currencyCode);
+            response.setStatus(HttpServletResponse.SC_OK);
 
-            if (wasItDeleted) {
-                response.setStatus(HttpServletResponse.SC_OK);
-            } else {
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                objectMapper.writeValue(printWriter, new ErrorResponseDTO(ERROR_CURRENCY_NOT_FOUND));
-            }
         } catch (InvalidCurrencyCodeException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            objectMapper.writeValue(printWriter, new ErrorResponseDTO(e.getMessage()));
+        } catch (CurrencyNotFoundException e) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             objectMapper.writeValue(printWriter, new ErrorResponseDTO(e.getMessage()));
         } catch (DatabaseUnavailableException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -70,7 +66,8 @@ public class CurrencyServlet extends BaseServlet {
     }
 
     @Override
-    protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void service(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         printWriter = response.getWriter();
         super.service(request, response);
     }

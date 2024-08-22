@@ -8,5 +8,5 @@ public interface CurrencyService {
     List<CurrencyDTO> getAllCurrencies();
     CurrencyDTO getCurrencyByCode(String code);
     CurrencyDTO addCurrency(CurrencyDTO currencyDTO);
-    boolean deleteCurrency(String code);
+    void deleteCurrency(String code);
 }

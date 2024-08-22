@@ -10,7 +10,7 @@ public interface ExchangeRateDAO {
 
     Optional<ExchangeRate> getExchangeRateByCurrencyPairId(int baseCurrencyId, int targetCurrencyId);
 
-    void addExchangeRate(ExchangeRate exchangeRate);
+    ExchangeRate addExchangeRate(ExchangeRate exchangeRate);
 
     void updateExchangeRate(ExchangeRate exchangeRate);
 

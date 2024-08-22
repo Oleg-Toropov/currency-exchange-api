@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExchangeRate {
-    private int id;
+    private Integer id;
     private int baseCurrencyId;
     private int targetCurrencyId;
     private BigDecimal rate;

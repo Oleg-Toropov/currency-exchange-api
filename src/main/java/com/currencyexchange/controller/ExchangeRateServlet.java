@@ -1,10 +1,8 @@
 package com.currencyexchange.controller;
 
-import com.currencyexchange.dto.CurrencyDTO;
 import com.currencyexchange.dto.ErrorResponseDTO;
 import com.currencyexchange.dto.ExchangeRateDTO;
 import com.currencyexchange.exception.DatabaseUnavailableException;
-import com.currencyexchange.exception.InvalidCurrencyCodeException;
 import com.currencyexchange.exception.InvalidCurrencyCodePairException;
 import com.currencyexchange.service.ExchangeRateService;
 import com.currencyexchange.service.ExchangeRateServiceImpl;
@@ -14,7 +12,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.util.Optional;
 
 @WebServlet(name = "ExchangeRateServlet", urlPatterns = "/exchangeRate/*")
 public class ExchangeRateServlet extends BaseServlet{

@@ -3,7 +3,8 @@ package com.currencyexchange.controller;
 import com.currencyexchange.dto.CurrencyDTO;
 import com.currencyexchange.dto.ErrorResponseDTO;
 import com.currencyexchange.exception.DatabaseUnavailableException;
-import com.currencyexchange.exception.InvalidParametersException;
+import com.currencyexchange.exception.InvalidCurrencyCodeException;
+import com.currencyexchange.exception.InvalidFieldsException;
 import com.currencyexchange.service.CurrencyService;
 import com.currencyexchange.service.CurrencyServiceImpl;
 import jakarta.servlet.ServletException;
@@ -39,18 +40,18 @@ public class CurrenciesServlet extends BaseServlet {
         String name = request.getParameter("name");
         String code = request.getParameter("code");
         String sign = request.getParameter("sign");
-        List<String> parameters = Arrays.asList(name, code, sign);
+        List<String> fields = Arrays.asList(name, code, sign);
 
         try {
-            Validator.validateParameters(parameters);
-        } catch (InvalidParametersException e) {
+            Validator.validateFields(fields);
+        } catch (InvalidFieldsException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             objectMapper.writeValue(printWriter, new ErrorResponseDTO(e.getMessage()));
             return;
         }
 
         try {
-            CurrencyDTO newCurrency = new CurrencyDTO(null, code, name, sign);
+            CurrencyDTO newCurrency = new CurrencyDTO(null, name, code, sign);
             CurrencyDTO addedCurrency = currencyService.addCurrency(newCurrency);
 
             response.setStatus(HttpServletResponse.SC_CREATED);

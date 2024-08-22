@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Optional;
 
 public class ExchangeRateServiceImpl implements ExchangeRateService {
-
     private final ExchangeRateDAO exchangeRateDAO;
     private final CurrencyDAO currencyDAO;
     private final CurrencyServiceImpl currencyService;
@@ -23,12 +22,6 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
         this.exchangeRateDAO = new ExchangeRateDAOImpl();
         this.currencyDAO = new CurrencyDAOImpl();
         this.currencyService = new CurrencyServiceImpl();
-    }
-
-    public ExchangeRateServiceImpl(ExchangeRateDAO exchangeRateDAO, CurrencyDAO currencyDAO, CurrencyServiceImpl currencyService) {
-        this.exchangeRateDAO = exchangeRateDAO;
-        this.currencyDAO = currencyDAO;
-        this.currencyService = currencyService;
     }
 
     @Override
@@ -59,9 +52,11 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
     }
 
     @Override
-    public void addExchangeRate(ExchangeRateDTO exchangeRateDTO) {
-        ExchangeRate exchangeRate = convertExchangeRateDTOToEntity(exchangeRateDTO);
-        exchangeRateDAO.addExchangeRate(exchangeRate);
+    public ExchangeRateDTO addExchangeRate(ExchangeRateDTO exchangeRateDTO) {
+        ExchangeRate newExchangeRate = convertExchangeRateDTOToEntity(exchangeRateDTO);
+        ExchangeRate addedExchangeRate = exchangeRateDAO.addExchangeRate(newExchangeRate);
+
+        return convertExchangeRateToDTO(addedExchangeRate);
     }
 
     @Override
