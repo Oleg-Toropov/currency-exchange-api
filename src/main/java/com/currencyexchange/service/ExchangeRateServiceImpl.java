@@ -6,6 +6,8 @@ import com.currencyexchange.dao.ExchangeRateDAO;
 import com.currencyexchange.dao.ExchangeRateDAOImpl;
 import com.currencyexchange.dto.CurrencyDTO;
 import com.currencyexchange.dto.ExchangeRateDTO;
+import com.currencyexchange.exception.ExchangeRateExistsException;
+import com.currencyexchange.exception.ExchangeRateNotFoundException;
 import com.currencyexchange.model.Currency;
 import com.currencyexchange.model.ExchangeRate;
 
@@ -42,18 +44,29 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
         Optional<Currency> targetCurrency = currencyDAO.getCurrencyByCode(targetCode);
 
         if (baseCurrency.isEmpty() || targetCurrency.isEmpty()) {
-            return null;
+            throw new ExchangeRateNotFoundException();
         }
 
         Optional<ExchangeRate> exchangeRate =
                 exchangeRateDAO.getExchangeRateByCurrencyPairId(baseCurrency.get().getId(), targetCurrency.get().getId());
 
-        return exchangeRate.map(this::convertExchangeRateToDTO).orElse(null);
+        if (exchangeRate.isEmpty()) {
+            throw new ExchangeRateNotFoundException();
+        }
+
+        return convertExchangeRateToDTO(exchangeRate.get());
     }
 
     @Override
     public ExchangeRateDTO addExchangeRate(ExchangeRateDTO exchangeRateDTO) {
         ExchangeRate newExchangeRate = convertExchangeRateDTOToEntity(exchangeRateDTO);
+        Optional<ExchangeRate> exchangeRate = exchangeRateDAO.getExchangeRateByCurrencyPairId(
+                newExchangeRate.getBaseCurrencyId(), newExchangeRate.getTargetCurrencyId());
+
+        if (exchangeRate.isPresent()) {
+            throw new ExchangeRateExistsException();
+        }
+
         ExchangeRate addedExchangeRate = exchangeRateDAO.addExchangeRate(newExchangeRate);
 
         return convertExchangeRateToDTO(addedExchangeRate);

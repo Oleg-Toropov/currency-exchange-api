@@ -3,6 +3,7 @@ package com.currencyexchange.service;
 import com.currencyexchange.dao.CurrencyDAO;
 import com.currencyexchange.dao.CurrencyDAOImpl;
 import com.currencyexchange.dto.CurrencyDTO;
+import com.currencyexchange.exception.CurrencyExistsException;
 import com.currencyexchange.exception.CurrencyNotFoundException;
 import com.currencyexchange.model.Currency;
 
@@ -40,6 +41,12 @@ public class CurrencyServiceImpl implements CurrencyService {
     @Override
     public CurrencyDTO addCurrency(CurrencyDTO currencyDTO) {
         Currency newCurrency = convertCurrencyDTOToEntity(currencyDTO);
+        Optional<Currency> currency = currencyDAO.getCurrencyByCode(newCurrency.getCode());
+
+        if(currency.isPresent()) {
+            throw new CurrencyExistsException();
+        }
+
         Currency addedCurrency = currencyDAO.addCurrency(newCurrency);
 
         return convertCurrencyToDTO(addedCurrency);

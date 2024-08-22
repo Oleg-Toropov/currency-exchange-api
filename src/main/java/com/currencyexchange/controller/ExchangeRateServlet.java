@@ -3,6 +3,7 @@ package com.currencyexchange.controller;
 import com.currencyexchange.dto.ErrorResponseDTO;
 import com.currencyexchange.dto.ExchangeRateDTO;
 import com.currencyexchange.exception.DatabaseUnavailableException;
+import com.currencyexchange.exception.ExchangeRateNotFoundException;
 import com.currencyexchange.exception.InvalidCurrencyCodePairException;
 import com.currencyexchange.service.ExchangeRateService;
 import com.currencyexchange.service.ExchangeRateServiceImpl;
@@ -14,9 +15,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @WebServlet(name = "ExchangeRateServlet", urlPatterns = "/exchangeRate/*")
-public class ExchangeRateServlet extends BaseServlet{
+public class ExchangeRateServlet extends BaseServlet {
     private final ExchangeRateService exchangeRateService = new ExchangeRateServiceImpl();
-    private static final String ERROR_EXCHANGE_RATE_NOT_FOUND = "Exchange rate for the pair not found";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -24,20 +24,18 @@ public class ExchangeRateServlet extends BaseServlet{
 
         try {
             String[] codePair = Validator.validateCurrencyCodePair(pathInfo);
-            String baseCode = codePair[0];
-            String targetCode = codePair[1];
 
-            ExchangeRateDTO exchangeRateDTO = exchangeRateService.getExchangeRateByCurrencyCodePair(baseCode, targetCode);
+            ExchangeRateDTO exchangeRateDTO =
+                    exchangeRateService.getExchangeRateByCurrencyCodePair(codePair[0], codePair[1]);
 
-            if (exchangeRateDTO == null) {
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                objectMapper.writeValue(printWriter, new ErrorResponseDTO(ERROR_EXCHANGE_RATE_NOT_FOUND));
-            } else {
-                response.setStatus(HttpServletResponse.SC_OK);
-                objectMapper.writeValue(printWriter, exchangeRateDTO);
-            }
+            response.setStatus(HttpServletResponse.SC_OK);
+            objectMapper.writeValue(printWriter, exchangeRateDTO);
+
         } catch (InvalidCurrencyCodePairException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            objectMapper.writeValue(printWriter, new ErrorResponseDTO(e.getMessage()));
+        } catch (ExchangeRateNotFoundException e) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             objectMapper.writeValue(printWriter, new ErrorResponseDTO(e.getMessage()));
         } catch (DatabaseUnavailableException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
