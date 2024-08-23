@@ -5,15 +5,20 @@ import com.currencyexchange.exception.InvalidCurrencyCodeException;
 import com.currencyexchange.exception.InvalidFieldsException;
 import com.currencyexchange.exception.InvalidRateException;
 
-import java.math.BigDecimal;
-import java.util.List;
-
 public class Validator {
     private static final int POSITION_BASE_CODE = 3;
     private static final int POSITION_TARGET_CODE = 6;
     private static final int LENGTH_RATE_CODE = 6;
 
-    public static void validateFields(List<String> fields) {
+    public static String validateRateFromBody(String field) {
+        if (field == null || !field.startsWith("rate=")) {
+            throw new InvalidFieldsException();
+        }
+
+        return field.replaceAll("rate=", "");
+    }
+
+    public static void validateFields(String[] fields) {
         for (String field : fields) {
             if (field == null || field.isEmpty()) {
                 throw new InvalidFieldsException();

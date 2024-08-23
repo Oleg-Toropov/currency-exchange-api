@@ -1,6 +1,5 @@
 package com.currencyexchange.controller;
 
-import com.currencyexchange.dto.CurrencyDTO;
 import com.currencyexchange.dto.ErrorResponseDTO;
 import com.currencyexchange.dto.ExchangeRateDTO;
 import com.currencyexchange.exception.*;
@@ -14,13 +13,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.List;
 
 @WebServlet(name = "ExchangeRatesServlet", urlPatterns = "/exchangeRates")
 public class ExchangeRatesServlet extends BaseServlet {
     private final ExchangeRateService exchangeRateService = new ExchangeRateServiceImpl();
-    private final CurrencyService currencyService = new CurrencyServiceImpl();
     private static final String ERROR_CURRENCY_DOES_NOT_EXIST = "One (or both) currency from the currency pair does not " +
             "exist in the database";
 
@@ -41,19 +38,14 @@ public class ExchangeRatesServlet extends BaseServlet {
         String baseCurrencyCode = request.getParameter("baseCurrencyCode");
         String targetCurrencyCode = request.getParameter("targetCurrencyCode");
         String rate = request.getParameter("rate");
-        List<String> fields = List.of(baseCurrencyCode, targetCurrencyCode, rate);
 
         try {
-            Validator.validateFields(fields);
+            Validator.validateFields(new String[]{baseCurrencyCode, targetCurrencyCode, rate});
             Validator.validateRate(rate);
 
-            CurrencyDTO baseCurrency = currencyService.getCurrencyByCode(baseCurrencyCode);
-            CurrencyDTO targetCurrency = currencyService.getCurrencyByCode(targetCurrencyCode);
+            ExchangeRateDTO addedExchangeRate =
+                    exchangeRateService.addExchangeRate(baseCurrencyCode, targetCurrencyCode, rate);
 
-            ExchangeRateDTO newExchangeRateDTO =
-                    new ExchangeRateDTO(null, baseCurrency, targetCurrency, new BigDecimal(rate));
-
-            ExchangeRateDTO addedExchangeRate = exchangeRateService.addExchangeRate(newExchangeRateDTO);
             response.setStatus(HttpServletResponse.SC_CREATED);
             objectMapper.writeValue(printWriter, addedExchangeRate);
 

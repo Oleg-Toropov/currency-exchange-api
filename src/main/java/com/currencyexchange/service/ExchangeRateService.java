@@ -9,9 +9,9 @@ public interface ExchangeRateService {
 
     ExchangeRateDTO getExchangeRateByCurrencyCodePair(String baseCode, String targetCode);
 
-    ExchangeRateDTO addExchangeRate(ExchangeRateDTO exchangeRateDTO);
+    ExchangeRateDTO addExchangeRate(String baseCode, String targetCode, String rate);
 
-    void updateExchangeRate(ExchangeRateDTO exchangeRateDTO);
+    ExchangeRateDTO updateExchangeRate(String baseCode, String targetCode, String rate);
 
     void deleteExchangeRate(int id);
 }

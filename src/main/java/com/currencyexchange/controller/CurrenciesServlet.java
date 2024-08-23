@@ -36,10 +36,9 @@ public class CurrenciesServlet extends BaseServlet {
         String name = request.getParameter("name");
         String code = request.getParameter("code");
         String sign = request.getParameter("sign");
-        List<String> fields = List.of(name, code, sign);
 
         try {
-            Validator.validateFields(fields);
+            Validator.validateFields(new String[]{name, code, sign});
 
             CurrencyDTO newCurrency = new CurrencyDTO(null, name, code, sign);
             CurrencyDTO addedCurrency = currencyService.addCurrency(newCurrency);

@@ -94,14 +94,13 @@ public class ExchangeRateDAOImpl implements ExchangeRateDAO {
 
     @Override
     public void updateExchangeRate(ExchangeRate exchangeRate) {
-        String query = "UPDATE ExchangeRates SET BaseCurrencyId = ?, TargetCurrencyId = ?, Rate = ? WHERE ID = ?";
+        String query = "UPDATE ExchangeRates SET Rate = ? WHERE ID = ?";
         try (Connection connection = DBCPDataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, exchangeRate.getBaseCurrencyId());
-            statement.setInt(2, exchangeRate.getTargetCurrencyId());
-            statement.setBigDecimal(3, exchangeRate.getRate());
-            statement.setInt(4, exchangeRate.getId());
+            statement.setBigDecimal(1, exchangeRate.getRate());
+            statement.setInt(2, exchangeRate.getId());
             statement.executeUpdate();
+
         } catch (SQLException e) {
             logger.error("Error updating exchange rate", e);
             throw new DatabaseUnavailableException(e);
