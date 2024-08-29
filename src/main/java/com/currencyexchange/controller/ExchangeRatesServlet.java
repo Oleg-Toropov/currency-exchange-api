@@ -3,8 +3,6 @@ package com.currencyexchange.controller;
 import com.currencyexchange.dto.ErrorResponseDTO;
 import com.currencyexchange.dto.ExchangeRateDTO;
 import com.currencyexchange.exception.*;
-import com.currencyexchange.service.CurrencyService;
-import com.currencyexchange.service.CurrencyServiceImpl;
 import com.currencyexchange.service.ExchangeRateService;
 import com.currencyexchange.service.ExchangeRateServiceImpl;
 import jakarta.servlet.ServletException;
@@ -41,7 +39,7 @@ public class ExchangeRatesServlet extends BaseServlet {
 
         try {
             Validator.validateFields(new String[]{baseCurrencyCode, targetCurrencyCode, rate});
-            Validator.validateRate(rate);
+            Validator.validateRateOrAmount(rate);
 
             ExchangeRateDTO addedExchangeRate =
                     exchangeRateService.addExchangeRate(baseCurrencyCode, targetCurrencyCode, rate);
@@ -49,7 +47,7 @@ public class ExchangeRatesServlet extends BaseServlet {
             response.setStatus(HttpServletResponse.SC_CREATED);
             objectMapper.writeValue(printWriter, addedExchangeRate);
 
-        } catch (InvalidFieldsException | InvalidRateException e) {
+        } catch (InvalidFieldsException | InvalidRateOrAmountException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             objectMapper.writeValue(printWriter, new ErrorResponseDTO(e.getMessage()));
         } catch (CurrencyNotFoundException e) {

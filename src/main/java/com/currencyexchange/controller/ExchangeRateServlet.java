@@ -49,7 +49,7 @@ public class ExchangeRateServlet extends BaseServlet {
         try {
             String[] codePair = Validator.validateCurrencyCodePair(pathInfo);
             String rate = Validator.validateRateFromBody(field);
-            Validator.validateRate(rate);
+            Validator.validateRateOrAmount(rate);
 
             ExchangeRateDTO exchangeRateDTO =
                     exchangeRateService.updateExchangeRate(codePair[0], codePair[1], rate);
@@ -57,7 +57,7 @@ public class ExchangeRateServlet extends BaseServlet {
             response.setStatus(HttpServletResponse.SC_OK);
             objectMapper.writeValue(printWriter, exchangeRateDTO);
 
-        } catch (InvalidCurrencyCodePairException | InvalidFieldsException | InvalidRateException e) {
+        } catch (InvalidCurrencyCodePairException | InvalidFieldsException | InvalidRateOrAmountException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             objectMapper.writeValue(printWriter, new ErrorResponseDTO(e.getMessage()));
         } catch (CurrencyNotFoundException | ExchangeRateNotFoundException e) {

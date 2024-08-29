@@ -3,7 +3,7 @@ package com.currencyexchange.controller;
 import com.currencyexchange.exception.InvalidCurrencyCodePairException;
 import com.currencyexchange.exception.InvalidCurrencyCodeException;
 import com.currencyexchange.exception.InvalidFieldsException;
-import com.currencyexchange.exception.InvalidRateException;
+import com.currencyexchange.exception.InvalidRateOrAmountException;
 
 public class Validator {
     private static final int POSITION_BASE_CODE = 3;
@@ -26,9 +26,9 @@ public class Validator {
         }
     }
 
-    public static void validateRate(String rate) {
-        if (!rate.matches("^\\d+(\\.\\d+)?$")) {
-            throw new InvalidRateException();
+    public static void validateRateOrAmount(String value) {
+        if (!value.matches("^\\d+(\\.\\d+)?$")) {
+            throw new InvalidRateOrAmountException();
         }
     }
 

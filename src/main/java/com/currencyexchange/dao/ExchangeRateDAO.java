@@ -15,4 +15,7 @@ public interface ExchangeRateDAO {
     void updateExchangeRate(ExchangeRate exchangeRate);
 
     void deleteExchangeRate(int id);
+    List<ExchangeRate> getExchangeRatesByGeneralBaseCurrency(int baseCurrencyId, int targetCurrencyId);
+    List<ExchangeRate> getExchangeRatesByGeneralTargetCurrency(int baseCurrencyId, int targetCurrencyId);
+    List<ExchangeRate> getExchangeRatesByGeneralBaseTargetCurrency(int baseCurrencyId, int targetCurrencyId);
 }

@@ -1,8 +1,8 @@
 package com.currencyexchange.dao;
 
+import com.currencyexchange.config.DBCPDataSource;
 import com.currencyexchange.exception.DatabaseUnavailableException;
 import com.currencyexchange.model.Currency;
-import com.currencyexchange.config.DBCPDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,10 +44,11 @@ public class CurrencyDAOImpl implements CurrencyDAO {
         try (Connection connection = DBCPDataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, id);
-            ResultSet resultSet = statement.executeQuery();
 
-            if (resultSet.next()) {
-                return Optional.of(mapResultSetToCurrency(resultSet));
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return Optional.of(mapResultSetToCurrency(resultSet));
+                }
             }
 
         } catch (SQLException e) {
@@ -65,10 +66,11 @@ public class CurrencyDAOImpl implements CurrencyDAO {
         try (Connection connection = DBCPDataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, code);
-            ResultSet resultSet = statement.executeQuery();
 
-            if (resultSet.next()) {
-                return Optional.of(mapResultSetToCurrency(resultSet));
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return Optional.of(mapResultSetToCurrency(resultSet));
+                }
             }
 
         } catch (SQLException e) {
