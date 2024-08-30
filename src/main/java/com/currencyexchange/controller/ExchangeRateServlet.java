@@ -25,7 +25,7 @@ public class ExchangeRateServlet extends BaseServlet {
             String[] codePair = Validator.validateCurrencyCodePair(pathInfo);
 
             ExchangeRateDTO exchangeRateDTO =
-                    exchangeRateService.getExchangeRateByCurrencyCodePair(codePair[0], codePair[1]);
+                    exchangeRateService.getExchangeRateByCurrencyPairCode(codePair[0], codePair[1]);
 
             response.setStatus(HttpServletResponse.SC_OK);
             objectMapper.writeValue(printWriter, exchangeRateDTO);
@@ -63,6 +63,27 @@ public class ExchangeRateServlet extends BaseServlet {
         } catch (CurrencyNotFoundException | ExchangeRateNotFoundException e) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             objectMapper.writeValue(printWriter, new ErrorResponseDTO(EXCHANGE_RATE_NOT_FOUND));
+        } catch (DatabaseUnavailableException e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            objectMapper.writeValue(printWriter, new ErrorResponseDTO(e.getMessage()));
+        }
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String pathInfo = request.getPathInfo();
+
+        try {
+            int id = Validator.validateId(pathInfo);
+            exchangeRateService.deleteExchangeRate(id);
+            response.setStatus(HttpServletResponse.SC_OK);
+
+        } catch (InvalidIdException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            objectMapper.writeValue(printWriter, new ErrorResponseDTO(e.getMessage()));
+        } catch (ExchangeRateNotFoundException e) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            objectMapper.writeValue(printWriter, new ErrorResponseDTO(e.getMessage()));
         } catch (DatabaseUnavailableException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             objectMapper.writeValue(printWriter, new ErrorResponseDTO(e.getMessage()));

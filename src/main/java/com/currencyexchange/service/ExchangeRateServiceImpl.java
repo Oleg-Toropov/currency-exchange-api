@@ -31,26 +31,19 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
     @Override
     public List<ExchangeRateDTO> getAllExchangeRates() {
         List<ExchangeRate> exchangeRates = exchangeRateDAO.getAllExchangeRates();
-        List<ExchangeRateDTO> exchangeRateDTOs = new ArrayList<>();
+        List<ExchangeRateDTO> exchangeRatesDTO = new ArrayList<>();
 
         for (ExchangeRate exchangeRate : exchangeRates) {
-            exchangeRateDTOs.add(convertExchangeRateToDTO(exchangeRate));
+            exchangeRatesDTO.add(convertExchangeRateToDTO(exchangeRate));
         }
 
-        return exchangeRateDTOs;
+        return exchangeRatesDTO;
     }
 
     @Override
-    public ExchangeRateDTO getExchangeRateByCurrencyCodePair(String baseCode, String targetCode) {
-        Optional<Currency> baseCurrency = currencyDAO.getCurrencyByCode(baseCode);
-        Optional<Currency> targetCurrency = currencyDAO.getCurrencyByCode(targetCode);
-
-        if (baseCurrency.isEmpty() || targetCurrency.isEmpty()) {
-            throw new ExchangeRateNotFoundException();
-        }
-
+    public ExchangeRateDTO getExchangeRateByCurrencyPairCode(String baseCode, String targetCode) {
         Optional<ExchangeRate> exchangeRate =
-                exchangeRateDAO.getExchangeRateByCurrencyPairId(baseCurrency.get().getId(), targetCurrency.get().getId());
+                exchangeRateDAO.getExchangeRateByCurrencyPairCode(baseCode, targetCode);
 
         if (exchangeRate.isEmpty()) {
             throw new ExchangeRateNotFoundException();
@@ -61,13 +54,13 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
 
     @Override
     public ExchangeRateDTO addExchangeRate(String baseCurrencyCode, String targetCurrencyCode, String rate) {
-        List<Integer> currencyId = checkExistsCurrencies(baseCurrencyCode, targetCurrencyCode);
+        List<Currency> currencies = checkExistsCurrencies(baseCurrencyCode, targetCurrencyCode);
 
         ExchangeRate newExchangeRate =
-                new ExchangeRate(null, currencyId.get(0), currencyId.get(1), new BigDecimal(rate));
+                new ExchangeRate(null, currencies.get(0), currencies.get(1), new BigDecimal(rate));
 
         Optional<ExchangeRate> exchangeRate = exchangeRateDAO.getExchangeRateByCurrencyPairId(
-                newExchangeRate.getBaseCurrencyId(), newExchangeRate.getTargetCurrencyId());
+                newExchangeRate.getBaseCurrency().getId(), newExchangeRate.getTargetCurrency().getId());
 
         if (exchangeRate.isPresent()) {
             throw new ExchangeRateExistsException();
@@ -80,10 +73,10 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
 
     @Override
     public ExchangeRateDTO updateExchangeRate(String baseCurrencyCode, String targetCurrencyCode, String rate) {
-        List<Integer> currencyId = checkExistsCurrencies(baseCurrencyCode, targetCurrencyCode);
+        List<Currency> currencies = checkExistsCurrencies(baseCurrencyCode, targetCurrencyCode);
 
         Optional<ExchangeRate> exchangeRate =
-                exchangeRateDAO.getExchangeRateByCurrencyPairId(currencyId.get(0), currencyId.get(1));
+                exchangeRateDAO.getExchangeRateByCurrencyPairId(currencies.get(0).getId(), currencies.get(1).getId());
 
         if (exchangeRate.isEmpty()) {
             throw new ExchangeRateNotFoundException();
@@ -96,7 +89,18 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
         return convertExchangeRateToDTO(exchangeRateForUpdate);
     }
 
-    private List<Integer> checkExistsCurrencies(String baseCurrencyCode, String targetCurrencyCode) {
+    @Override
+    public void deleteExchangeRate(int id) {
+        Optional<ExchangeRate> exchangeRate = exchangeRateDAO.getExchangeRateById(id);
+
+        if (exchangeRate.isEmpty()) {
+            throw new ExchangeRateNotFoundException();
+        }
+
+        exchangeRateDAO.deleteExchangeRate(id);
+    }
+
+    private List<Currency> checkExistsCurrencies(String baseCurrencyCode, String targetCurrencyCode) {
         Optional<Currency> baseCurrency = currencyDAO.getCurrencyByCode(baseCurrencyCode);
         Optional<Currency> targetCurrency = currencyDAO.getCurrencyByCode(targetCurrencyCode);
 
@@ -104,25 +108,16 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
             throw new CurrencyNotFoundException();
         }
 
-        return List.of(baseCurrency.get().getId(), targetCurrency.get().getId());
-    }
-
-    @Override
-    public void deleteExchangeRate(int id) {
-        exchangeRateDAO.deleteExchangeRate(id);
+        return List.of(baseCurrency.get(), targetCurrency.get());
     }
 
     private ExchangeRateDTO convertExchangeRateToDTO(ExchangeRate exchangeRate) {
-        Optional<Currency> baseCurrency = currencyDAO.getCurrencyById(exchangeRate.getBaseCurrencyId());
-        Optional<Currency> targetCurrency = currencyDAO.getCurrencyById(exchangeRate.getTargetCurrencyId());
-        CurrencyDTO baseCurrencyDTO = baseCurrency.map(currencyService::convertCurrencyToDTO).orElse(null);
-        CurrencyDTO targetCurrencyDTO = targetCurrency.map(currencyService::convertCurrencyToDTO).orElse(null);
+        ExchangeRateDTO exchangeRateDTO = new ExchangeRateDTO();
+        exchangeRateDTO.setId(exchangeRate.getId());
+        exchangeRateDTO.setBaseCurrency(currencyService.convertCurrencyToDTO(exchangeRate.getBaseCurrency()));
+        exchangeRateDTO.setTargetCurrency(currencyService.convertCurrencyToDTO(exchangeRate.getTargetCurrency()));
+        exchangeRateDTO.setRate(exchangeRate.getRate());
 
-        return new ExchangeRateDTO(exchangeRate.getId(), baseCurrencyDTO, targetCurrencyDTO, exchangeRate.getRate());
-    }
-
-    private ExchangeRate convertExchangeRateDTOToEntity(ExchangeRateDTO dto) {
-        return new ExchangeRate(dto.getId(), dto.getBaseCurrency().getId(),
-                dto.getTargetCurrency().getId(), dto.getRate());
+        return exchangeRateDTO;
     }
 }

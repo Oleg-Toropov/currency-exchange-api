@@ -5,7 +5,4 @@ public class InvalidFieldsException extends RuntimeException{
     public InvalidFieldsException() {
         super(DEFAULT_MESSAGE);
     }
-    public InvalidFieldsException(String message) {
-        super(DEFAULT_MESSAGE + " " + message);
-    }
 }

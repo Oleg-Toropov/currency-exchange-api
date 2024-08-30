@@ -82,9 +82,13 @@ public class CurrencyDAOImpl implements CurrencyDAO {
     }
 
     private Currency mapResultSetToCurrency(ResultSet resultSet) {
-        try {
-            return new Currency(resultSet.getInt("ID"), resultSet.getString("Code"),
-                    resultSet.getString("FullName"), resultSet.getString("Sign"));
+        try { Currency currency = new Currency();
+            currency.setId(resultSet.getInt("ID"));
+            currency.setCode(resultSet.getString("Code"));
+            currency.setFullName(resultSet.getString("FullName"));
+            currency.setSign(resultSet.getString("Sign"));
+
+            return currency;
         } catch (SQLException e) {
             throw new DatabaseUnavailableException(e);
         }

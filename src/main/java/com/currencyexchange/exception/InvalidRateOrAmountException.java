@@ -5,7 +5,4 @@ public class InvalidRateOrAmountException extends RuntimeException{
     public InvalidRateOrAmountException() {
         super(DEFAULT_MESSAGE);
     }
-    public InvalidRateOrAmountException(String message) {
-        super(DEFAULT_MESSAGE + " " + message);
-    }
 }

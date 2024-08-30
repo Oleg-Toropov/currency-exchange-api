@@ -1,9 +1,6 @@
 package com.currencyexchange.controller;
 
-import com.currencyexchange.exception.InvalidCurrencyCodePairException;
-import com.currencyexchange.exception.InvalidCurrencyCodeException;
-import com.currencyexchange.exception.InvalidFieldsException;
-import com.currencyexchange.exception.InvalidRateOrAmountException;
+import com.currencyexchange.exception.*;
 
 public class Validator {
     private static final int POSITION_BASE_CODE = 3;
@@ -30,6 +27,19 @@ public class Validator {
         if (!value.matches("^\\d+(\\.\\d+)?$")) {
             throw new InvalidRateOrAmountException();
         }
+    }
+
+    public static int validateId(String id) {
+        if (id == null || id.length() <= 1) {
+            throw new InvalidIdException();
+        }
+
+        id = id.substring(1);
+        if (!id.matches("^\\d+(\\.\\d+)?$")) {
+            throw new InvalidIdException();
+        }
+
+        return Integer.parseInt(id);
     }
 
     public static void validateCurrencyCode(String codeCurrency) {
