@@ -4,7 +4,6 @@ import com.currencyexchange.dao.CurrencyDAO;
 import com.currencyexchange.dao.CurrencyDAOImpl;
 import com.currencyexchange.dao.ExchangeRateDAO;
 import com.currencyexchange.dao.ExchangeRateDAOImpl;
-import com.currencyexchange.dto.CurrencyDTO;
 import com.currencyexchange.dto.ExchangeRateDTO;
 import com.currencyexchange.exception.CurrencyNotFoundException;
 import com.currencyexchange.exception.ExchangeRateExistsException;
